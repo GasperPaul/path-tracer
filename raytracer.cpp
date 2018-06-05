@@ -339,6 +339,7 @@ struct Scene {
 
 void raytrace(Scene& scene) {
 	float* p = scene.imgBuf;
+	#pragma omp parallel for shared(scene,p)
 	for (int y = 0; y < scene.screenHeight; ++y) {
 		uint32_t state = (y * 9781 + scene.frameCount * 6271) | 1;
 		for (int x = 0; x < scene.screenWidth; ++x) {
@@ -352,10 +353,11 @@ void raytrace(Scene& scene) {
 			}
 			color *= 1.0f / float(scene.samplesPerPixel);
 			// write color
-			p[0] = color.x;
-			p[1] = color.y;
-			p[2] = color.z;
-			p += 4;
+			int i = (y * scene.screenWidth + x) * 4; 
+			p[i+0] = color.x;
+			p[i+1] = color.y;
+			p[i+2] = color.z;
+			//p += 4;
 		}
 	}
 }
